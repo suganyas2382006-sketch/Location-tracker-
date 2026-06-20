@@ -1,7 +1,6 @@
-const socket=io();
+const socket = io();
 
-const map=L.map("map")
-.setView([0,0],13);
+const map = L.map("map").setView([20.5937,78.9629],5);
 
 L.tileLayer(
 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -12,14 +11,17 @@ maxZoom:19
 
 let marker;
 
+if(navigator.geolocation){
+
 navigator.geolocation.watchPosition(
+
 (position)=>{
 
-const lat=
-position.coords.latitude;
+const lat=position.coords.latitude;
+const lng=position.coords.longitude;
 
-const lng=
-position.coords.longitude;
+console.log("Latitude:",lat);
+console.log("Longitude:",lng);
 
 socket.emit(
 "send-location",
@@ -45,8 +47,33 @@ marker=L.marker(
 
 }
 
-}
+},
+
+(error)=>{
+
+console.log(error);
+
+alert(
+"Location permission denied"
 );
+
+},
+
+{
+enableHighAccuracy:true,
+timeout:5000,
+maximumAge:0
+}
+
+);
+
+}else{
+
+alert(
+"Geolocation not supported"
+);
+
+}
 
 socket.on(
 "receive-location",
@@ -56,5 +83,4 @@ L.marker(
 [data.lat,data.lng]
 ).addTo(map);
 
-}
-);
+});
